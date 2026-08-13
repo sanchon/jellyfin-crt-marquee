@@ -23,22 +23,25 @@ vec4 hook() {
 //!BIND MAIN_RGB
 //!BIND HOOKED
 
-#define BRIGHTNESS 1.5
-#define GAMMA_INPUT 2.4
-#define GAMMA_OUTPUT 2.4
-#define GLOW_DIFFUSION 0.05
-#define GLOW_HALATION 0.1
-#define GLOW_HEIGHT 0.5
-#define GLOW_WIDTH 0.5
-#define MASK_COLORS 2
-#define MASK_SIZE 1
-#define MASK_STRENGTH 0.3
-#define SCANLINE_OFFSET 1
-#define SCANLINE_SHAPE 2.5
-#define SCANLINE_SIZE_MAX 1.5
-#define SCANLINE_SIZE_MIN 0.5
-#define SHARPNESS_EDGES 3
-#define SHARPNESS_IMAGE 1
+// const (no #define): estos nombres coinciden con campos del struct _params_
+// (params.SHARPNESS_IMAGE, etc). Un #define los reemplazaria tambien ahi por
+// texto plano (ej. "float SHARPNESS_IMAGE;" -> "float 1;"), rompiendo el struct.
+const float BRIGHTNESS = 1.5;
+const float GAMMA_INPUT = 2.4;
+const float GAMMA_OUTPUT = 2.4;
+const float GLOW_DIFFUSION = 0.05;
+const float GLOW_HALATION = 0.1;
+const float GLOW_HEIGHT = 0.5;
+const float GLOW_WIDTH = 0.5;
+const float MASK_COLORS = 2.0;
+const float MASK_SIZE = 1.0;
+const float MASK_STRENGTH = 0.3;
+const float SCANLINE_OFFSET = 1.0;
+const float SCANLINE_SHAPE = 2.5;
+const float SCANLINE_SIZE_MAX = 1.5;
+const float SCANLINE_SIZE_MIN = 0.5;
+const float SHARPNESS_EDGES = 3.0;
+const float SHARPNESS_IMAGE = 1.0;
 
 vec4 vertex_gl_Position;
 struct _params_ {

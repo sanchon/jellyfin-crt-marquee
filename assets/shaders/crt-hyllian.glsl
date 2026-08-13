@@ -23,19 +23,22 @@ vec4 hook() {
 //!BIND MAIN_RGB
 //!BIND HOOKED
 
-#define BEAM_MAX_WIDTH 1
-#define BEAM_MIN_WIDTH 1
-#define BEAM_PROFILE 0
-#define COLOR_BOOST 1.3
-#define CRT_ANTI_RINGING 1
-#define HFILTER_PROFILE 0
-#define InputGamma 2.4
-#define MASK_INTENSITY 0.7
-#define OutputGamma 2.2
-#define PHOSPHOR_LAYOUT 4
-#define SCANLINES_STRENGTH 0.58
-#define SHARPNESS_HACK 1
-#define VSCANLINES 0
+// const (no #define): estos nombres coinciden con campos del struct _param_
+// (param.BEAM_PROFILE, etc). Un #define los reemplazaria tambien ahi por
+// texto plano (ej. "float BEAM_PROFILE;" -> "float 0;"), rompiendo el struct.
+const float BEAM_MAX_WIDTH = 1.0;
+const float BEAM_MIN_WIDTH = 1.0;
+const float BEAM_PROFILE = 0.0;
+const float COLOR_BOOST = 1.3;
+const float CRT_ANTI_RINGING = 1.0;
+const float HFILTER_PROFILE = 0.0;
+const float InputGamma = 2.4;
+const float MASK_INTENSITY = 0.7;
+const float OutputGamma = 2.2;
+const float PHOSPHOR_LAYOUT = 4.0;
+const float SCANLINES_STRENGTH = 0.58;
+const float SHARPNESS_HACK = 1.0;
+const float VSCANLINES = 0.0;
 
 vec4 vertex_gl_Position;
 struct _param_ {
