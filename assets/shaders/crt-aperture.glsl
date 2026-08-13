@@ -11,6 +11,18 @@
 //!SAVE MAIN_RGB
 //!BIND HOOKED
 
+// linearize/delinearize no son nativas en vo=gpu (solo en vo=gpu-next), asi
+// que se definen aca como respaldo si no vinieran ya provistas por mpv.
+#ifndef linearize
+vec4 linearize(vec4 color) {
+	const float _const_0_1 = 0.05958483740687370300;
+	const float _const_1_1 = 0.87031054496765136718;
+	color.rgb = max(color.rgb, 0.0);
+	color.rgb = _const_1_1 * pow(color.rgb + vec3(_const_0_1), vec3(2.4));
+	return color;
+}
+#endif
+
 vec4 hook() {
 	return linearize(HOOKED_tex(HOOKED_pos));
 }
@@ -22,6 +34,16 @@ vec4 hook() {
 //!HEIGHT OUTPUT.height 1 *
 //!BIND MAIN_RGB
 //!BIND HOOKED
+
+#ifndef delinearize
+vec4 delinearize(vec4 color) {
+	const float _const_0_2 = 0.05958483740687370300;
+	const float _const_1_2 = 1.14901518821716308593;
+	color.rgb = max(color.rgb, 0.0);
+	color.rgb = pow(_const_1_2 * color.rgb, vec3(1.0/2.4)) - vec3(_const_0_2);
+	return color;
+}
+#endif
 
 // const (no #define): estos nombres coinciden con campos del struct _params_
 // (params.SHARPNESS_IMAGE, etc). Un #define los reemplazaria tambien ahi por
