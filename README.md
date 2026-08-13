@@ -4,6 +4,10 @@ Launcher (instalador + selector + lanzador) de shaders CRT + marco/marquee de TV
 
 Convierte la reproducción de video en Jellyfin en algo así:
 
+![Captura: barras SMPTE dentro del marco de TV con el shader CRT Lottes aplicado](docs/images/screenshot.png)
+
+*(Barras de color SMPTE con el shader `crt-lottes`, generado con `mpv --vo=gpu` — ver [Pruebas](#pruebas))*
+
 - El video queda insertado dentro del hueco de pantalla de una TV CRT antigua (imagen con marco).
 - El área de pantalla aplica un shader CRT real (curvatura, scanlines, máscara de fósforo RGB) — el marco/carcasa de la TV se queda intacto, sin el efecto encima.
 - Podés elegir entre 3 shaders distintos o desactivarlo.
