@@ -77,19 +77,23 @@ for the full story (including a real false positive that happened early on).
 This repository was generated in a conversational programming session with
 **Claude** (Anthropic), using **Claude Code** (the official CLI agent) as the tool.
 
-- **AI assistant**: Claude, by Anthropic — model **Claude Opus 4.8** (model id
-  `claude-opus-4-8[1m]`).
+- **AI assistant**: Claude, by Anthropic. The session's *system prompt*
+  identified itself as **Claude Opus 4.8** (model id `claude-opus-4-8[1m]`),
+  but the real usage breakdown reported by Claude Code's `/cost` command (see
+  below) shows that the model actually billed for almost all of the work was
+  **`claude-sonnet-5`**, with a small fraction on **`claude-haiku-4-5`** (used
+  for web searches). This discrepancy is recorded as-is, with no attempt to
+  reconcile it — it may be down to internal platform routing/fallback not
+  visible from within the conversation.
 - **Tool**: [Claude Code](https://claude.com/claude-code), Anthropic's official
   command-line agent, running in agentic mode with access to PowerShell, file
   editing and web search (not a plain chat: the agent itself installed
   software, edited GLSL shaders, read compiler logs, and created/pushed this
   git repository).
 - **Date**: August 13, 2026.
-- **Session duration**: there's no exact start/end stopwatch available to the
-  assistant, but based on real timestamps that were recorded (Jellyfin Media
-  Player logs from 12:15, and 14 git commits between 13:10 and 13:46), the
-  session lasted **at least an hour and a half**; the actual work may have run
-  longer, since the conversation continued after the last commit recorded here.
+- **Actual duration (exact `/cost` figure)**: **1h 40m 30s wall-clock time**
+  (total session time), of which **54m 15s** was API compute time. Matches the
+  earlier estimate made from log/git timestamps (≥1.5h).
 - **Number of messages/prompts**: a manual count of the visible turns in the
   conversation comes to **~30 user messages** (including answers to the
   assistant's clarifying questions and one uploaded image), across **14
@@ -99,21 +103,19 @@ This repository was generated in a conversational programming session with
   13:10:20, last at 13:46:09 by git timestamps — the actual work involved
   considerably more back-and-forth diagnosis in between that didn't always end
   up as a commit).
-- **Token cost (estimate)**: the assistant doesn't have access to an exact token
-  counter from inside the conversation itself, but a rough figure can be
-  reasoned from the session's volume: ~30 turns, long PowerShell outputs
-  (hundred-plus-line shader compile logs), several full re-reads/rewrites of the
-  GLSL shaders (~200-300 lines each), more than a dozen images analyzed
-  (screenshots, test frames, the TV frame image) and several web
-  searches/fetches — and since the full conversation history gets resent on
-  every turn, the cumulative total of tokens processed across the whole session
-  is probably in the **order of several hundred thousand, possibly over a
-  million tokens**. This is a reasoned estimate based on content volume, not a
-  measured figure.
-  For the exact number: in Claude Code you can run the **`/cost`** command
-  during or at the end of the session, which shows real accumulated token usage
-  and cost. If you share that figure, it can replace this estimate with the
-  exact number.
+- **Code changes (exact `/cost` figure)**: 1,291 lines added, 561 lines removed
+  in total during the session (includes iteration and reverts, not just the
+  final state).
+- **Cost and tokens (exact `/cost` figure)**: **$30.13** total.
+  - `claude-sonnet-5`: 21.7k input tokens, 272.9k output tokens, 76.0 million
+    cache-read tokens, 510.9k cache-write tokens ($30.03).
+  - `claude-haiku-4-5`: 57.0k input tokens, 3.7k output tokens, no cache usage,
+    3 web searches ($0.1057).
+  - Most of the token volume is cache reads (cheap per token), which is why
+    the total cost stayed moderate ($30) despite tens of millions of tokens
+    processed overall — typical of a long session where the conversation
+    history gets served from cache turn-to-turn instead of being reprocessed
+    from scratch.
 
 Honest notes on the process, not marketing:
 

@@ -76,20 +76,25 @@ para el detalle (incluye una trampa real que dio un falso positivo al principio)
 Este repositorio se generó en una sesión de programación conversacional con **Claude**
 (Anthropic), usando **Claude Code** (el agente CLI oficial) como herramienta.
 
-- **Asistente de IA**: Claude, de Anthropic — modelo **Claude Opus 4.8** (id de
-  modelo `claude-opus-4-8[1m]`).
+- **Asistente de IA**: Claude, de Anthropic. El *system prompt* de la sesión se
+  identificaba como **Claude Opus 4.8** (id de modelo `claude-opus-4-8[1m]`),
+  pero el desglose de uso real reportado por el comando `/cost` de Claude Code
+  (ver más abajo) indica que el modelo que realmente facturó casi todo el
+  trabajo fue **`claude-sonnet-5`**, con una fracción menor en
+  **`claude-haiku-4-5`** (usado para búsquedas web). Se deja constancia de esta
+  discrepancia tal cual, sin intentar reconciliarla — puede deberse a
+  enrutamiento/fallback interno de la plataforma no visible desde la
+  conversación.
 - **Herramienta**: [Claude Code](https://claude.com/claude-code), el agente de
   línea de comandos oficial de Anthropic, en modo agéntico con acceso a
   PowerShell, edición de archivos y búsqueda web (no un simple chat: el propio
   agente instaló software, editó shaders GLSL, leyó logs de compilación, y
   creó/subió el repositorio de git).
 - **Fecha**: 13 de agosto de 2026.
-- **Duración de la sesión**: no hay un cronómetro exacto de inicio/fin
-  disponible para el asistente, pero por las marcas de tiempo reales que sí
-  quedaron registradas (logs de Jellyfin Media Player desde las 12:15, y 14
-  commits de git entre las 13:10 y las 13:46) la sesión duró **como mínimo
-  hora y media**; el trabajo real puede haber sido algo más largo, ya que la
-  conversación continuó después del último commit registrado aquí.
+- **Duración real (dato exacto de `/cost`)**: **1h 40m 30s de reloj**
+  (tiempo total de la sesión), de los cuales **54m 15s** fueron tiempo de
+  cómputo en la API. Coincide con la estimación previa hecha a partir de
+  timestamps de logs/git (≥1h30min).
 - **Número de mensajes/prompts**: un recuento manual de los turnos visibles en
   la conversación da **~30 mensajes** del usuario (incluyendo respuestas a
   preguntas de aclaración del asistente y una imagen subida), a lo largo de
@@ -99,22 +104,19 @@ Este repositorio se generó en una sesión de programación conversacional con *
 - **Commits en el repo**: 14, todos en esa misma sesión (primer commit 13:10:20,
   último 13:46:09 según los timestamps de git — el trabajo real incluyó bastante
   más iteración de diagnóstico entremedio que no siempre quedó como commit).
-- **Coste en tokens (estimación)**: el asistente no tiene acceso a un contador
-  exacto de tokens desde dentro de la propia conversación, pero se puede razonar
-  una cifra aproximada por el volumen de la sesión: ~30 turnos, con salidas de
-  PowerShell largas (logs de compilación de shaders de cientos de líneas), varias
-  relecturas/reescrituras completas de los shaders GLSL (~200-300 líneas cada
-  uno), más de una decena de imágenes analizadas (capturas de pantalla, frames de
-  prueba, la imagen del marco de TV) y varias búsquedas/lecturas web — y como el
-  historial completo de la conversación se reenvía en cada turno, el total
-  acumulado de tokens procesados en toda la sesión probablemente esté en el
-  **orden de varios cientos de miles, posiblemente más de un millón de tokens**.
-  Es una estimación razonada a partir del volumen de contenido, no una cifra
-  medida.
-  Para el número exacto: en Claude Code puedes correr el comando **`/cost`**
-  durante o al final de la sesión, que muestra el uso de tokens y coste real
-  acumulado. Si me pasas esa cifra, la actualizo aquí con el dato exacto en vez
-  de la estimación.
+- **Cambios de código (dato exacto de `/cost`)**: 1291 líneas añadidas, 561
+  líneas eliminadas en total durante la sesión (incluye iteraciones y
+  reversiones, no solo el estado final).
+- **Coste y tokens (dato exacto de `/cost`)**: **$30.13** en total.
+  - `claude-sonnet-5`: 21.700 tokens de entrada, 272.900 de salida, 76,0
+    millones de lectura de caché, 510.900 de escritura de caché ($30.03).
+  - `claude-haiku-4-5`: 57.000 tokens de entrada, 3.700 de salida, sin uso de
+    caché, 3 búsquedas web ($0.1057).
+  - El grueso del coste en tokens es lectura de caché (barata por token), lo
+    que explica que el coste total sea moderado ($30) pese a decenas de
+    millones de tokens procesados en total — típico de una sesión larga donde
+    el historial de la conversación se reutiliza en caché turno a turno en vez
+    de reprocesarse desde cero.
 
 Notas honestas sobre el proceso, no de marketing:
 
