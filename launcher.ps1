@@ -113,6 +113,13 @@ function Find-JMPExecutable {
     $candidates = @(
         (Join-Path $env:ProgramFiles "Jellyfin\Jellyfin Media Player\JellyfinMediaPlayer.exe")
     )
+    # $env:ProgramFiles se redirige a "Program Files (x86)" cuando el proceso de
+    # PowerShell que ejecuta esto es de 32 bits (redireccion de WOW64), aunque JMP
+    # este instalado en la ruta real de 64 bits. $env:ProgramW6432 siempre apunta
+    # a la ruta real de 64 bits sin importar la arquitectura del proceso.
+    if ($env:ProgramW6432) {
+        $candidates += (Join-Path $env:ProgramW6432 "Jellyfin\Jellyfin Media Player\JellyfinMediaPlayer.exe")
+    }
     if (${env:ProgramFiles(x86)}) {
         $candidates += (Join-Path ${env:ProgramFiles(x86)} "Jellyfin\Jellyfin Media Player\JellyfinMediaPlayer.exe")
     }
@@ -122,6 +129,21 @@ function Find-JMPExecutable {
     $proc = Get-Process -Name "JellyfinMediaPlayer" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($proc -and $proc.Path) { return $proc.Path }
     return $null
+}
+
+function Wait-AnyKeyOrButton {
+    # Espera cualquier tecla o cualquier boton del mando (no solo Enter).
+    param([string]$Message = "Presiona cualquier tecla o boton del mando para salir...")
+    Write-Host $Message
+    while ($true) {
+        if ([Console]::KeyAvailable) {
+            [Console]::ReadKey($true) | Out-Null
+            return
+        }
+        $state = Get-GamepadState
+        if ($state -and $state.Gamepad.wButtons -ne 0) { return }
+        Start-Sleep -Milliseconds 50
+    }
 }
 
 Write-Host "=== Instalador / lanzador de shader CRT para Jellyfin Media Player ===" -ForegroundColor Cyan
@@ -228,5 +250,5 @@ if ($exePath) {
     Start-Process -FilePath $exePath
 } else {
     Write-Host "No pude encontrar JellyfinMediaPlayer.exe automaticamente. Abrelo manualmente." -ForegroundColor Yellow
-    Read-Host "Presiona Enter para salir"
+    Wait-AnyKeyOrButton
 }
