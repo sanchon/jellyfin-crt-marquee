@@ -32,10 +32,10 @@
 #define BLOOM_AMOUNT (1.0/16.0)
 #define SHAPE 2.0
 
-// Rectangulo de la pantalla dentro del PNG del marco (tv_bezel.png, 670x473),
-// detectado por deteccion de canal alfa: X=36 Y=78 W=474 H=364
-#define SCREEN_MIN vec2(0.053731, 0.164905)
-#define SCREEN_MAX vec2(0.761194, 0.934461)
+// Rectangulo de la pantalla dentro del PNG del marco (tv_frame.png, 1275x832),
+// detectado por deteccion de canal alfa: X=109 Y=116 W=822 H=613
+#define SCREEN_MIN vec2(0.085490, 0.139423)
+#define SCREEN_MAX vec2(0.730196, 0.876202)
 
 
 #ifndef linearize

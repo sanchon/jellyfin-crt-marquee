@@ -163,7 +163,7 @@ if ($running) {
 # 2) Crear carpetas de destino y copiar assets
 New-Item -ItemType Directory -Force -Path $jmpConfig, "$jmpConfig\shaders", "$jmpConfig\images" | Out-Null
 Copy-Item "$assets\shaders\*.glsl" "$jmpConfig\shaders\" -Force
-Copy-Item "$assets\images\tv_bezel.png" "$jmpConfig\images\tv_bezel.png" -Force
+Copy-Item "$assets\images\tv_frame.png" "$jmpConfig\images\tv_frame.png" -Force
 Write-Host "Shaders e imagen del marco instalados en: $jmpConfig" -ForegroundColor Green
 
 # 3) Activar useOpenGL en jellyfinmediaplayer.conf (necesario o el shader se ve en pantalla negra)
@@ -205,19 +205,21 @@ $selected = $options[$choice]
 
 # 5) Generar mpv.conf (marco de TV + shader elegido, o vacio si se desactivo todo)
 if ($selected.Marquee) {
-    $tvBezelPath = Join-Path $jmpConfig "images\tv_bezel.png"
+    $tvBezelPath = Join-Path $jmpConfig "images\tv_frame.png"
     $glslLine = if ($selected.File) { "glsl-shaders=`"~~/shaders/$($selected.File)`"" } else { "# glsl-shaders desactivado (sin efecto CRT)" }
 
     $mpvConfContent = @"
 # Generado por el instalador de shader CRT (JellyfinCRT-Installer).
-# Marquee de TV CRT: inserta el video dentro del hueco de pantalla de tv_bezel.png (670x473),
+# Marquee de TV CRT: inserta el video dentro del hueco de pantalla de tv_frame.png (1275x832),
 # rellenando el area y dejando barras negras si el aspecto no coincide.
 # Se usa --external-file en vez de movie=... dentro del grafo porque el filtro movie
 # no soporta bien rutas de Windows con letra de unidad (bug conocido de ffmpeg/mpv).
 external-file="$tvBezelPath"
-# Fondo negro solido debajo del PNG de la TV: funde a negro tanto el area transparente
-# alrededor de la TV como el borde difuso semi-transparente del hueco de pantalla.
-lavfi-complex=[vid1]scale=474:364:force_original_aspect_ratio=decrease,pad=474:364:(ow-iw)/2:(oh-ih)/2:color=black[v];color=c=black:s=670x473[bg];[bg][vid2]overlay=0:0[tvopaque];[tvopaque][v]overlay=36:78,format=yuv420p[vo]
+# Orden de composicion: negro -> video -> marco ENCIMA. El PNG del marco tiene el hueco
+# de pantalla realmente transparente, asi que el video asoma por el y las esquinas
+# redondeadas del tubo recortan la imagen. El video se dibuja 826x618 en 108,114: un par
+# de pixeles mas grande que el hueco (109,115 822x615) para que no quede junta visible.
+lavfi-complex=[vid1]scale=826:618:force_original_aspect_ratio=decrease,pad=826:618:(ow-iw)/2:(oh-ih)/2:color=black[v];color=c=black:s=1275x832[bg];[bg][v]overlay=108:114[conVideo];[conVideo][vid2]overlay=0:0,format=yuv420p[vo]
 
 # Shader CRT activo (confinado al hueco de pantalla del marco)
 $glslLine

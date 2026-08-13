@@ -56,7 +56,8 @@ It's portable: you can copy the whole folder to another PC with Jellyfin Media P
 ## How it works (technical summary)
 
 - `mpv.conf` uses `--lavfi-complex` to composite the video inside the screen cutout of the frame PNG (`external-file` instead of the `movie=` filter, because `movie=` doesn't handle Windows drive-letter paths well — a known ffmpeg/mpv bug).
-- The screen cutout in the PNG was detected by analyzing the alpha channel (semi-transparent) with a flood-fill script: `X=36 Y=78 W=474 H=364` on a `670x473` image.
+- The screen cutout in the PNG was detected by analyzing the alpha channel with a flood-fill script: `X=109 Y=115 W=822 H=615` on a `1275x832` image.
+- The compositing order is black → video → frame **on top**. Because the PNG's cutout is genuinely transparent, the video shows through it and the tube's rounded corners clip the picture. The video is drawn a few pixels larger than the cutout so no seam is visible.
 - Each GLSL shader was modified to confine the CRT effect (curvature, scanlines, mask) to that rectangle only — outside of it, the pixel passes through unprocessed, so the effect isn't applied to the TV's plastic casing.
 - Jellyfin Media Player **does not** allow switching shaders on the fly with keyboard shortcuts: its UI layer (`inputmaps/*.json`) intercepts every key before it reaches mpv. That's why switching shaders means reinstalling/reconfiguring, not pressing a key inside the app.
 
@@ -155,13 +156,13 @@ in the screenshots.
   modifications made to the shaders — the screen-area clipping, the `#define` to
   `const float` change, and the `linearize`/`delinearize` fallbacks); it does
   **not** relicense each author's original CRT algorithm.
-- **`assets/images/tv_bezel.png`**: the TV frame image was provided by this
-  repository's human author; its exact origin/license was not verified by the AI
-  assistant that generated this project. If you hold the rights to this image and
-  object to its use here, open an issue and it will be removed.
+- **`assets/images/tv_frame.png`** (TV frame): an **AI-generated** image (Google
+  Gemini), retouched afterwards. It does not derive from any copyrighted photograph,
+  and the brand shown on the panel is fictional. Lacking human authorship, this
+  repo's MIT license covers the code and claims no rights over this image.
 
 ## Credits and licenses
 
 - The shaders `crt-lottes.glsl`, `crt-aperture.glsl` and `crt-hyllian.glsl` are adaptations of CRT shaders ported to mpv format by the [hhirtz/mpv-retro-shaders](https://github.com/hhirtz/mpv-retro-shaders) project (using the `mpv-libretro` tool) from original shaders in [libretro/glsl-shaders](https://github.com/libretro/glsl-shaders), originally created by Timothy Lottes (crt-lottes), Hyllian (crt-hyllian) and other contributors from the libretro/RetroArch community. Each shader retains its original copyright header where available in the source. See the repositories mentioned for each shader's license details.
-- The `tv_bezel.png` image was provided by this repository's author (see Legal disclaimers above).
+- The `tv_frame.png` image was AI-generated (Google Gemini) and retouched by this repository's author (see Legal disclaimers above).
 - This repository's original code (`launcher.ps1`, the `.bat`, the screen-area clipping changes to the shaders, `mpv.conf`) is distributed under the MIT license (see `LICENSE`).

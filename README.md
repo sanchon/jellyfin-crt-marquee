@@ -55,7 +55,8 @@ Es portable: puedes copiar toda la carpeta a otro PC con Jellyfin Media Player i
 ## Cómo funciona (resumen técnico)
 
 - `mpv.conf` usa `--lavfi-complex` para componer el vídeo dentro del hueco de pantalla del PNG del marco (`external-file` en vez del filtro `movie=`, porque `movie=` no soporta bien rutas de Windows con letra de unidad — bug conocido de ffmpeg/mpv).
-- El hueco de pantalla del PNG se detectó analizando el canal alfa (semitransparente) con un script de flood-fill: `X=36 Y=78 W=474 H=364` sobre una imagen de `670x473`.
+- El hueco de pantalla del PNG se detectó analizando el canal alfa con un script de flood-fill: `X=109 Y=115 W=822 H=615` sobre una imagen de `1275x832`.
+- El orden de composición es negro → vídeo → marco **encima**. Como el hueco del PNG es realmente transparente, el vídeo asoma por él y las esquinas redondeadas del tubo recortan la imagen. El vídeo se dibuja unos píxeles más grande que el hueco para que no quede junta visible.
 - Cada shader GLSL fue modificado para confinar el efecto CRT (curvatura, scanlines, máscara) solo a ese rectángulo — fuera de él, el píxel pasa sin procesar, para no aplicar el efecto sobre la carcasa/plástico de la TV.
 - Jellyfin Media Player **no** permite cambiar de shader en caliente con atajos de teclado: su capa de interfaz (`inputmaps/*.json`) intercepta todas las teclas antes de que lleguen a mpv. Por eso el cambio de shader se hace reinstalando/reconfigurando, no con una tecla dentro de la app.
 
@@ -158,14 +159,13 @@ mostrado en las capturas.
   pantalla, el cambio de `#define` a `const float`, y los fallbacks de
   `linearize`/`delinearize`), **no** relicencia el algoritmo CRT original de cada
   autor.
-- **`assets/images/tv_bezel.png`**: la imagen del marco de TV fue provista por el
-  autor humano de este repositorio; el origen/licencia exacta de la imagen no ha
-  sido verificado por el asistente de IA que generó este proyecto. Si eres el
-  titular de los derechos de esta imagen y objetas su uso aquí, abre un issue y se
-  retira.
+- **`assets/images/tv_frame.png`** (marco de TV): imagen **generada con IA** (Google
+  Gemini) y retocada después. No deriva de ninguna fotografía con copyright, y la
+  marca que aparece en el panel es ficticia. Al no haber autoría humana, la licencia
+  MIT de este repositorio cubre el código y no reclama derechos sobre esta imagen.
 
 ## Créditos y licencias
 
 - Los shaders `crt-lottes.glsl`, `crt-aperture.glsl` y `crt-hyllian.glsl` son adaptaciones de shaders CRT portados a formato mpv por el proyecto [hhirtz/mpv-retro-shaders](https://github.com/hhirtz/mpv-retro-shaders) (usando la herramienta `mpv-libretro`) a partir de shaders originales de [libretro/glsl-shaders](https://github.com/libretro/glsl-shaders), creados originalmente por Timothy Lottes (crt-lottes), Hyllian (crt-hyllian) y otros colaboradores de la comunidad libretro/RetroArch. Cada shader conserva su encabezado de copyright original cuando estaba disponible en la fuente. Ver los repositorios mencionados para el detalle de licencia de cada shader.
-- La imagen `tv_bezel.png` fue provista por el autor de este repositorio (ver Avisos legales arriba).
+- La imagen `tv_frame.png` fue generada con IA (Google Gemini) y retocada por el autor de este repositorio (ver Avisos legales arriba).
 - El código propio de este repositorio (`launcher.ps1`, el `.bat`, los cambios de recorte de área de pantalla en los shaders, `mpv.conf`) se distribuye bajo licencia MIT (ver `LICENSE`).

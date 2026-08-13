@@ -54,12 +54,12 @@ Write-Host "Usando mpv: $mpv" -ForegroundColor DarkGray
 # funcione en cualquier maquina que clone el repo, tenga o no JMP instalado)
 New-Item -ItemType Directory -Force -Path $OutDir, "$OutDir\config\shaders", "$OutDir\config\images" | Out-Null
 Copy-Item "$assets\shaders\*.glsl" "$OutDir\config\shaders\" -Force
-Copy-Item "$assets\images\tv_bezel.png" "$OutDir\config\images\tv_bezel.png" -Force
+Copy-Item "$assets\images\tv_frame.png" "$OutDir\config\images\tv_frame.png" -Force
 
-$tvBezelPath = Join-Path $OutDir "config\images\tv_bezel.png"
+$tvBezelPath = Join-Path $OutDir "config\images\tv_frame.png"
 $mpvConfContent = @"
 external-file="$tvBezelPath"
-lavfi-complex=[vid1]scale=474:364:force_original_aspect_ratio=decrease,pad=474:364:(ow-iw)/2:(oh-ih)/2:color=black[v];color=c=black:s=670x473[bg];[bg][vid2]overlay=0:0[tvopaque];[tvopaque][v]overlay=36:78,format=yuv420p[vo]
+lavfi-complex=[vid1]scale=826:618:force_original_aspect_ratio=decrease,pad=826:618:(ow-iw)/2:(oh-ih)/2:color=black[v];color=c=black:s=1275x832[bg];[bg][v]overlay=108:114[conVideo];[conVideo][vid2]overlay=0:0,format=yuv420p[vo]
 "@
 Set-Content -Path "$OutDir\config\mpv.conf" -Value $mpvConfContent -Encoding utf8
 

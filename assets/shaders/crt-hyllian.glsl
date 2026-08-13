@@ -87,6 +87,8 @@ struct _global_ {
 vec4 Position = vec4(HOOKED_pos, 0., 1.);
 vec2 TexCoord = HOOKED_pos;
 vec2 vTexCoord;
+// Coordenada SIN curvar, solo para la mascara de fosforo (ver hook() abajo).
+vec2 vMaskCoord;
 void vertex_main() {
     vertex_gl_Position = global.MVP * Position;
     vTexCoord = TexCoord * 1.0001;
@@ -296,23 +298,56 @@ void fragment_main() {
     d0 = exp(-d0 * d0);
     d1 = exp(-d1 * d1);
     vec3 color = profile.w * (color0 * d0 + color1 * d1);
-    vec2 mask_coords = vTexCoord.xy * global.OutputSize.xy;
+    vec2 mask_coords = vMaskCoord.xy * global.OutputSize.xy;
     mask_coords = mix(mask_coords.xy, mask_coords.yx, param.VSCANLINES);
     color.rgb *= fragment_mask_weights(mask_coords, param.MASK_INTENSITY, int(param.PHOSPHOR_LAYOUT));
     color = pow(color, vec3(1. / param.OutputGamma, 1. / param.OutputGamma, 1. / param.OutputGamma));
     FragColor = vec4(color, 1.);
 }
 
-// Rectangulo de la pantalla dentro del marco de TV (tv_bezel.png, 670x473): X=36 Y=78 W=474 H=364
-#define SCREEN_MIN vec2(0.053731, 0.164905)
-#define SCREEN_MAX vec2(0.761194, 0.934461)
+// Rectangulo de la pantalla dentro del marco de TV (tv_frame.png, 1275x832): X=109 Y=116 W=822 H=613
+#define SCREEN_MIN vec2(0.085490, 0.139423)
+#define SCREEN_MAX vec2(0.730196, 0.876202)
+
+// Curvatura del tubo. Mismos valores que crt-lottes para que las opciones se
+// sientan coherentes entre si: x = cuanto se abomba en horizontal, y = en vertical.
+// Subelos para mas panza (0.05 ya es muy marcado), ponlos a 0 para desactivarla.
+#define CURVATURE vec2(0.025, 0.035)
+
+vec2 bend_screen(vec2 pos) {
+    pos = pos * 2.0 - 1.0;
+    pos *= vec2(1.0 + (pos.y * pos.y) * CURVATURE.x, 1.0 + (pos.x * pos.x) * CURVATURE.y);
+    return pos * 0.5 + 0.5;
+}
 
 vec4 hook() {
     if (HOOKED_pos.x < SCREEN_MIN.x || HOOKED_pos.x > SCREEN_MAX.x || HOOKED_pos.y < SCREEN_MIN.y || HOOKED_pos.y > SCREEN_MAX.y) {
         // HOOKED aqui es el MAIN original (crudo, sin linearizar) -- no aplicar delinearize().
         return HOOKED_tex(HOOKED_pos);
     }
+
     vertex_main();
+
+    // Este shader no muestrea con una coordenada explicita como crt-lottes: todo
+    // fragment_main() tira de vTexCoord. Asi que la curvatura se aplica
+    // sobrescribiendo vTexCoord con la coordenada abombada, despues de
+    // vertex_main() y antes de fragment_main().
+    vec2 rect_size = SCREEN_MAX - SCREEN_MIN;
+    vec2 local = (HOOKED_pos - SCREEN_MIN) / rect_size;
+    vec2 bent = bend_screen(local);
+
+    // La mascara de fosforo es una propiedad fisica de la superficie del tubo, no
+    // de la imagen: se queda sin curvar (crt-lottes hace lo mismo). Por eso el
+    // muestreo usa la coordenada curvada y la mascara la original.
+    vMaskCoord = HOOKED_pos;
+    vTexCoord  = SCREEN_MIN + bent * rect_size;
+
     fragment_main();
+
+    // Lo que la curvatura empuja fuera del tubo se pinta en negro: es lo que
+    // dibuja el borde abombado contra el marco.
+    if (bent.x < 0.0 || bent.x > 1.0 || bent.y < 0.0 || bent.y > 1.0) {
+        return vec4(0.0, 0.0, 0.0, 1.0);
+    }
     return delinearize(FragColor);
 }

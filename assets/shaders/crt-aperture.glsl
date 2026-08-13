@@ -218,9 +218,9 @@ void fragment_main() {
     FragColor = vec4(col, 1.);
 }
 
-// Rectangulo de la pantalla dentro del marco de TV (tv_bezel.png, 670x473): X=36 Y=78 W=474 H=364
-#define SCREEN_MIN vec2(0.053731, 0.164905)
-#define SCREEN_MAX vec2(0.761194, 0.934461)
+// Rectangulo de la pantalla dentro del marco de TV (tv_frame.png, 1275x832): X=109 Y=116 W=822 H=613
+#define SCREEN_MIN vec2(0.085490, 0.139423)
+#define SCREEN_MAX vec2(0.730196, 0.876202)
 
 vec4 hook() {
     if (HOOKED_pos.x < SCREEN_MIN.x || HOOKED_pos.x > SCREEN_MAX.x || HOOKED_pos.y < SCREEN_MIN.y || HOOKED_pos.y > SCREEN_MAX.y) {
