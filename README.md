@@ -1,16 +1,40 @@
 # Jellyfin CRT Marquee
 
-Launcher (instalador + selector + lanzador) de shaders CRT + marco/marquee de TV vintage para [Jellyfin Media Player](https://github.com/jellyfin/jellyfin-media-player) (el cliente de escritorio basado en mpv).
+### Vuelve a ver tus series como se veían de verdad.
 
-Convierte la reproducción de video en Jellyfin en algo así:
+¿Te acordás de plantarte frente al televisor de tubo un sábado por la mañana? Las
+líneas de escaneo, el brillo fosforescente de la máscara RGB, esa leve curvatura de
+pantalla que hacía que todo se viera un poquito redondeado en los bordes. Así se veían
+*realmente* las series clásicas — no en el 4K plano y perfecto de un monitor moderno,
+sino a través de un tubo de rayos catódicos, con todas sus imperfecciones y su encanto.
+
+**Jellyfin CRT Marquee** le devuelve esa experiencia a tu biblioteca de Jellyfin.
+Un instalador, un doble clic, y tu contenido pasa a reproducirse dentro de una TV
+CRT de los 80 de cuerpo entero — marco, plástico, botones y todo — con un shader
+real de emulación de tubo aplicado sobre la imagen. No es un filtro de Instagram
+pegado encima: es el mismo tipo de matemática de scanlines y máscara de fósforo que
+usan los emuladores de RetroArch, corriendo en vivo sobre tu reproductor de Jellyfin.
+
+Poné una serie de los 80, apagá las luces, y volvé a sentir que la estás viendo por
+primera vez.
 
 ![Captura: barras SMPTE dentro del marco de TV con el shader CRT Lottes aplicado](docs/images/screenshot.png)
 
 *(Barras de color SMPTE con el shader `crt-lottes`, generado con `mpv --vo=gpu` — ver [Pruebas](#pruebas))*
 
-- El video queda insertado dentro del hueco de pantalla de una TV CRT antigua (imagen con marco).
-- El área de pantalla aplica un shader CRT real (curvatura, scanlines, máscara de fósforo RGB) — el marco/carcasa de la TV se queda intacto, sin el efecto encima.
-- Podés elegir entre 3 shaders distintos o desactivarlo.
+## Por qué te va a gustar
+
+- **El marco de TV es de verdad**: tu video queda insertado dentro del hueco de
+  pantalla de una TV CRT de los 80 con marco, botones y carcasa — no un simple
+  filtro superpuesto.
+- **El efecto CRT es real, no cosmético**: curvatura de pantalla, scanlines y
+  máscara de fósforo RGB calculadas en vivo por un shader GLSL, igual que en los
+  emuladores retro — no un overlay de PNG semitransparente.
+- **Elegís tu sabor de nostalgia**: tres shaders distintos (Lottes, Aperture,
+  Hyllian), cada uno con su propia personalidad, o apagalo todo cuando quieras
+  volver a lo moderno.
+- **Un doble clic y listo**: sin tocar configuraciones a mano, sin editar
+  `mpv.conf` vos mismo — el launcher instala, configura y abre Jellyfin por vos.
 
 ## Uso
 
