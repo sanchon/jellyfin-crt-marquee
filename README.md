@@ -29,6 +29,18 @@ Es portable: podés copiar toda la carpeta a otro PC con Jellyfin Media Player i
 - Cada shader GLSL fue modificado para confinar el efecto CRT (curvatura, scanlines, máscara) solo a ese rectángulo — fuera de él, el pixel pasa sin procesar, para no aplicar el efecto sobre la carcasa/plástico de la TV.
 - Jellyfin Media Player **no** permite cambiar de shader en caliente con atajos de teclado: su capa de interfaz (`inputmaps/*.json`) intercepta todas las teclas antes de que lleguen a mpv. Por eso el cambio de shader se hace reinstalando/reconfigurando, no con una tecla dentro de la app.
 
+## Pruebas
+
+`test/test-shaders.ps1` valida que los 3 shaders compilen y rendericen bien usando
+mpv standalone (`winget install --id shinchiro.mpv -e`), sin abrir Jellyfin Media
+Player ni hacer clic en nada — automatiza exactamente el diagnóstico que se hizo a
+mano para arreglar los bugs de `crt-aperture`/`crt-hyllian`. Ver [docs/TESTING.md](docs/TESTING.md)
+para el detalle (incluye una trampa real que hizo dar un falso positivo al principio).
+
+```powershell
+.\test\test-shaders.ps1
+```
+
 ## Créditos y licencias
 
 - Los shaders `crt-lottes.glsl`, `crt-aperture.glsl` y `crt-hyllian.glsl` son adaptaciones de shaders CRT portados a formato mpv por el proyecto [hhirtz/mpv-retro-shaders](https://github.com/hhirtz/mpv-retro-shaders) (usando la herramienta `mpv-libretro`) a partir de shaders originales de [libretro/glsl-shaders](https://github.com/libretro/glsl-shaders), creados originalmente por Timothy Lottes (crt-lottes), Hyllian (crt-hyllian) y otros colaboradores de la comunidad libretro/RetroArch. Cada shader conserva su encabezado de copyright original cuando estaba disponible en la fuente. Ver los repositorios mencionados para el detalle de licencia de cada shader.
