@@ -1,5 +1,6 @@
-# Instalador + selector de shader CRT / marquee de TV para Jellyfin Media Player.
-# Se puede correr las veces que quieras: reinstala los assets y te deja re-elegir shader.
+# Instalador + selector + lanzador de shader CRT / marquee de TV para Jellyfin Media Player.
+# Se puede correr las veces que quieras: reinstala los assets, te deja re-elegir shader,
+# y al final cierra (si estaba abierto) y vuelve a abrir Jellyfin Media Player.
 
 $ErrorActionPreference = 'Stop'
 
@@ -7,14 +8,33 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $assets    = Join-Path $scriptDir "assets"
 $jmpConfig = Join-Path $env:LOCALAPPDATA "jellyfinmediaplayer"
 
-Write-Host "=== Instalador de shader CRT para Jellyfin Media Player ===" -ForegroundColor Cyan
+function Find-JMPExecutable {
+    $candidates = @(
+        (Join-Path $env:ProgramFiles "Jellyfin\Jellyfin Media Player\JellyfinMediaPlayer.exe")
+    )
+    if (${env:ProgramFiles(x86)}) {
+        $candidates += (Join-Path ${env:ProgramFiles(x86)} "Jellyfin\Jellyfin Media Player\JellyfinMediaPlayer.exe")
+    }
+    foreach ($c in $candidates) {
+        if (Test-Path $c) { return $c }
+    }
+    $proc = Get-Process -Name "JellyfinMediaPlayer" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($proc -and $proc.Path) { return $proc.Path }
+    return $null
+}
+
+Write-Host "=== Instalador / lanzador de shader CRT para Jellyfin Media Player ===" -ForegroundColor Cyan
 Write-Host ""
 
-# 1) Avisar si JMP esta abierto
+# 1) Cerrar JMP si esta abierto (ANTES de tocar la config: si lo dejamos abierto y
+#    lo cierra el usuario despues, JMP reescribe jellyfinmediaplayer.conf con lo que
+#    tenia en memoria y perderiamos el cambio de useOpenGL).
+$exePath = Find-JMPExecutable
 $running = Get-Process -Name "JellyfinMediaPlayer" -ErrorAction SilentlyContinue
 if ($running) {
-    Write-Host "Jellyfin Media Player esta abierto. Cierralo para que los cambios se apliquen bien." -ForegroundColor Yellow
-    Read-Host "Cierralo y presiona Enter para continuar (o Enter para seguir de todos modos)"
+    Write-Host "Cerrando Jellyfin Media Player..." -ForegroundColor Cyan
+    $running | Stop-Process -Force
+    Start-Sleep -Seconds 2
 }
 
 # 2) Crear carpetas de destino y copiar assets
@@ -88,12 +108,19 @@ Set-Content -Path (Join-Path $jmpConfig "mpv.conf") -Value $mpvConfContent -Enco
 $inputConfContent = @"
 # Los atajos de teclado personalizados aqui NO funcionan en Jellyfin Media Player:
 # la interfaz de JMP (inputmaps/*.json) intercepta todas las teclas antes de que
-# lleguen a mpv. Para cambiar el shader CRT vuelve a correr install.ps1
-# (o "Instalar shader CRT.bat") antes de abrir JMP.
+# lleguen a mpv. Para cambiar el shader CRT vuelve a correr launcher.ps1
+# (o "Jellyfin CRT Launcher.bat") -- cierra y reabre JMP automaticamente.
 "@
 Set-Content -Path (Join-Path $jmpConfig "input.conf") -Value $inputConfContent -Encoding utf8
 
 Write-Host ""
 Write-Host "Listo: $($selected.Name)" -ForegroundColor Green
-Write-Host "Abre (o vuelve a abrir) Jellyfin Media Player para verlo aplicado." -ForegroundColor Green
-Read-Host "Presiona Enter para salir"
+
+# 6) Abrir Jellyfin Media Player
+if ($exePath) {
+    Write-Host "Abriendo Jellyfin Media Player..." -ForegroundColor Green
+    Start-Process -FilePath $exePath
+} else {
+    Write-Host "No pude encontrar JellyfinMediaPlayer.exe automaticamente. Abrelo manualmente." -ForegroundColor Yellow
+    Read-Host "Presiona Enter para salir"
+}
