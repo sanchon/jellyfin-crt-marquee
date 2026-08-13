@@ -15,7 +15,7 @@ Convierte la reproducción de video en Jellyfin en algo así:
    - Cierra Jellyfin Media Player si estaba abierto.
    - Copia los shaders y la imagen del marco a la carpeta de configuración de JMP (`%LOCALAPPDATA%\jellyfinmediaplayer`).
    - Activa `useOpenGL` en `jellyfinmediaplayer.conf` (necesario, si no el video se ve en pantalla negra — JMP usa ANGLE por defecto, que no soporta bien shaders multi-pasada).
-   - Te deja elegir el shader: **CRT Lottes**, **CRT Aperture**, **CRT Hyllian**, o ninguno.
+   - Te deja elegir: **CRT Lottes**, **CRT Aperture**, **CRT Hyllian**, solo el marco de TV sin shader, o desactivar todo (Jellyfin normal, sin marco ni shader).
    - Abre Jellyfin Media Player automáticamente con la configuración aplicada.
 
 Para cambiar de shader más adelante, repite el paso 1 (correr el launcher de nuevo es seguro, no duplica nada, y se encarga de cerrar/reabrir JMP).

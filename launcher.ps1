@@ -63,31 +63,33 @@ if (Test-Path $jsonPath) {
     Write-Host "Abre Jellyfin Media Player una vez, conectalo a tu servidor, cierralo, y vuelve a correr este instalador." -ForegroundColor Yellow
 }
 
-# 4) Elegir shader
+# 4) Elegir shader / marco
 $options = [ordered]@{
-    "1" = @{ Name = "CRT Lottes (curvatura + scanlines + mascara RGB)"; File = "crt-lottes.glsl" }
-    "2" = @{ Name = "CRT Aperture (rejilla nitida, mas ligero)";        File = "crt-aperture.glsl" }
-    "3" = @{ Name = "CRT Hyllian (scanlines + mascara balanceada)";     File = "crt-hyllian.glsl" }
-    "4" = @{ Name = "Ninguno (video plano dentro del marco de TV)";     File = $null }
+    "1" = @{ Name = "CRT Lottes (marco de TV + curvatura + scanlines + mascara RGB)"; File = "crt-lottes.glsl";   Marquee = $true }
+    "2" = @{ Name = "CRT Aperture (marco de TV + rejilla nitida, mas ligero)";        File = "crt-aperture.glsl"; Marquee = $true }
+    "3" = @{ Name = "CRT Hyllian (marco de TV + scanlines + mascara balanceada)";     File = "crt-hyllian.glsl";  Marquee = $true }
+    "4" = @{ Name = "Solo marco de TV (sin efecto CRT)";                              File = $null;               Marquee = $true }
+    "5" = @{ Name = "Desactivar todo (Jellyfin normal, sin marco ni shader)";         File = $null;               Marquee = $false }
 }
 Write-Host ""
-Write-Host "=== Elige el shader CRT ==="
+Write-Host "=== Elige el shader / marco CRT ==="
 foreach ($k in $options.Keys) {
     Write-Host "  $k) $($options[$k].Name)"
 }
 Write-Host ""
-$choice = Read-Host "Opcion (1-4)"
+$choice = Read-Host "Opcion (1-5)"
 if (-not $options.Contains($choice)) {
     Write-Host "Opcion invalida, uso CRT Lottes por defecto." -ForegroundColor Yellow
     $choice = "1"
 }
 $selected = $options[$choice]
 
-# 5) Generar mpv.conf completo (marquee de TV + shader elegido)
-$tvBezelPath = Join-Path $jmpConfig "images\tv_bezel.png"
-$glslLine = if ($selected.File) { "glsl-shaders=`"~~/shaders/$($selected.File)`"" } else { "# glsl-shaders desactivado (sin efecto CRT)" }
+# 5) Generar mpv.conf (marco de TV + shader elegido, o vacio si se desactivo todo)
+if ($selected.Marquee) {
+    $tvBezelPath = Join-Path $jmpConfig "images\tv_bezel.png"
+    $glslLine = if ($selected.File) { "glsl-shaders=`"~~/shaders/$($selected.File)`"" } else { "# glsl-shaders desactivado (sin efecto CRT)" }
 
-$mpvConfContent = @"
+    $mpvConfContent = @"
 # Generado por el instalador de shader CRT (JellyfinCRT-Installer).
 # Marquee de TV CRT: inserta el video dentro del hueco de pantalla de tv_bezel.png (670x473),
 # rellenando el area y dejando barras negras si el aspecto no coincide.
@@ -101,6 +103,13 @@ lavfi-complex=[vid1]scale=474:364:force_original_aspect_ratio=decrease,pad=474:3
 # Shader CRT activo (confinado al hueco de pantalla del marco)
 $glslLine
 "@
+} else {
+    $mpvConfContent = @"
+# Generado por el instalador de shader CRT (JellyfinCRT-Installer).
+# Todo desactivado: sin marco de TV, sin shader CRT. Jellyfin Media Player
+# reproduce normal. Vuelve a correr el launcher para reactivarlo.
+"@
+}
 
 Set-Content -Path (Join-Path $jmpConfig "mpv.conf") -Value $mpvConfContent -Encoding utf8
 
