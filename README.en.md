@@ -46,7 +46,7 @@ first time again.
    - Closes Jellyfin Media Player if it was open.
    - Copies the shaders and the frame image to JMP's config folder (`%LOCALAPPDATA%\jellyfinmediaplayer`).
    - Enables `useOpenGL` in `jellyfinmediaplayer.conf` (required, otherwise the video shows a black screen — JMP defaults to ANGLE, which doesn't handle multi-pass shaders well).
-   - Lets you pick: **CRT Lottes**, **CRT Aperture**, **CRT Hyllian**, just the TV frame with no shader, or disable everything (normal Jellyfin, no frame, no shader).
+   - Lets you pick: **CRT Lottes**, **CRT Aperture**, **CRT Hyllian**, just the TV frame with no shader, or disable everything (normal Jellyfin, no frame, no shader) — with the keyboard arrows, by typing the number, or with a **gamepad's D-pad and A button** (XInput/Xbox-style) if one is connected.
    - Opens Jellyfin Media Player automatically with the configuration applied.
 
 To switch shaders later, repeat step 1 (running the launcher again is safe, it doesn't duplicate anything, and it handles closing/reopening JMP for you).

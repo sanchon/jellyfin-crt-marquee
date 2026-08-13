@@ -8,6 +8,107 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $assets    = Join-Path $scriptDir "assets"
 $jmpConfig = Join-Path $env:LOCALAPPDATA "jellyfinmediaplayer"
 
+# Soporte de mando (XInput, mandos tipo Xbox) para navegar el menu de seleccion.
+# xinput9_1_0.dll viene incluida en Windows desde Vista, no requiere instalar nada.
+Add-Type -TypeDefinition @"
+using System.Runtime.InteropServices;
+public struct XINPUT_GAMEPAD {
+    public ushort wButtons;
+    public byte bLeftTrigger;
+    public byte bRightTrigger;
+    public short sThumbLX;
+    public short sThumbLY;
+    public short sThumbRX;
+    public short sThumbRY;
+}
+public struct XINPUT_STATE {
+    public uint dwPacketNumber;
+    public XINPUT_GAMEPAD Gamepad;
+}
+public static class XInput {
+    [DllImport("xinput9_1_0.dll")]
+    public static extern uint XInputGetState(uint dwUserIndex, ref XINPUT_STATE pState);
+}
+"@ -ErrorAction SilentlyContinue
+
+$script:XINPUT_DPAD_UP   = 0x0001
+$script:XINPUT_DPAD_DOWN = 0x0002
+$script:XINPUT_A         = 0x1000
+
+function Get-GamepadState {
+    # Devuelve el estado del primer mando conectado (indices 0-3), o $null si no hay ninguno.
+    try {
+        for ($i = 0; $i -lt 4; $i++) {
+            $state = New-Object XINPUT_STATE
+            if ([XInput]::XInputGetState($i, [ref]$state) -eq 0) { return $state }
+        }
+    } catch {
+        # xinput9_1_0.dll no disponible o algun otro fallo: seguimos solo con teclado.
+    }
+    return $null
+}
+
+function Select-MenuOption {
+    # Menu interactivo: flechas/D-pad + Enter/boton A para navegar y confirmar,
+    # o escribir el numero directamente. Funciona con o sin mando conectado.
+    param([System.Collections.Specialized.OrderedDictionary]$Options)
+
+    $keys = @($Options.Keys)
+    $selectedIndex = 0
+    $prevButtons = 0
+    $lastRender = -1
+
+    Write-Host ""
+    Write-Host "Flechas o D-pad del mando + Enter/boton A para elegir, o escribe el numero." -ForegroundColor DarkGray
+    Write-Host ""
+    $menuTop = [Console]::CursorTop
+
+    while ($true) {
+        if ($selectedIndex -ne $lastRender) {
+            [Console]::SetCursorPosition(0, $menuTop)
+            for ($i = 0; $i -lt $keys.Count; $i++) {
+                $k = $keys[$i]
+                $line = "  $k) $($Options[$k].Name)    "
+                if ($i -eq $selectedIndex) {
+                    Write-Host ("> $k) $($Options[$k].Name)    ") -ForegroundColor Black -BackgroundColor Cyan
+                } else {
+                    Write-Host $line
+                }
+            }
+            $lastRender = $selectedIndex
+        }
+
+        if ([Console]::KeyAvailable) {
+            $key = [Console]::ReadKey($true)
+            if ($key.Key -ge [ConsoleKey]::D1 -and $key.Key -le [ConsoleKey]::D9) {
+                $typed = [string]([int]$key.Key - [int][ConsoleKey]::D0)
+                if ($Options.Contains($typed)) { Write-Host ""; return $typed }
+            } elseif ($key.Key -eq [ConsoleKey]::UpArrow) {
+                $selectedIndex = ($selectedIndex - 1 + $keys.Count) % $keys.Count
+            } elseif ($key.Key -eq [ConsoleKey]::DownArrow) {
+                $selectedIndex = ($selectedIndex + 1) % $keys.Count
+            } elseif ($key.Key -eq [ConsoleKey]::Enter) {
+                Write-Host ""
+                return $keys[$selectedIndex]
+            }
+        }
+
+        $state = Get-GamepadState
+        if ($state) {
+            $buttons = $state.Gamepad.wButtons
+            $pressed = $buttons -band (-bnot $prevButtons)
+            if ($pressed -band $script:XINPUT_DPAD_UP)   { $selectedIndex = ($selectedIndex - 1 + $keys.Count) % $keys.Count }
+            if ($pressed -band $script:XINPUT_DPAD_DOWN) { $selectedIndex = ($selectedIndex + 1) % $keys.Count }
+            if ($pressed -band $script:XINPUT_A) { Write-Host ""; return $keys[$selectedIndex] }
+            $prevButtons = $buttons
+        } else {
+            $prevButtons = 0
+        }
+
+        Start-Sleep -Milliseconds 50
+    }
+}
+
 function Find-JMPExecutable {
     $candidates = @(
         (Join-Path $env:ProgramFiles "Jellyfin\Jellyfin Media Player\JellyfinMediaPlayer.exe")
@@ -72,12 +173,8 @@ $options = [ordered]@{
     "5" = @{ Name = "Desactivar todo (Jellyfin normal, sin marco ni shader)";         File = $null;               Marquee = $false }
 }
 Write-Host ""
-Write-Host "=== Elige el shader / marco CRT ==="
-foreach ($k in $options.Keys) {
-    Write-Host "  $k) $($options[$k].Name)"
-}
-Write-Host ""
-$choice = Read-Host "Opcion (1-5)"
+Write-Host "=== Elige el shader / marco CRT ===" -ForegroundColor Cyan
+$choice = Select-MenuOption -Options $options
 if (-not $options.Contains($choice)) {
     Write-Host "Opcion invalida, uso CRT Lottes por defecto." -ForegroundColor Yellow
     $choice = "1"
