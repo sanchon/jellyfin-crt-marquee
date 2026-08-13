@@ -2,7 +2,7 @@
 
 ### Vuelve a ver tus series como se veían de verdad.
 
-¿Te acordás de plantarte frente al televisor de tubo un sábado por la mañana? Las
+¿Te acuerdas de cuando te plantabas frente al televisor un sábado por la mañana? Las
 líneas de escaneo, el brillo fosforescente de la máscara RGB, esa leve curvatura de
 pantalla que hacía que todo se viera un poquito redondeado en los bordes. Así se veían
 *realmente* las series clásicas — no en el 4K plano y perfecto de un monitor moderno,
@@ -15,7 +15,7 @@ real de emulación de tubo aplicado sobre la imagen. No es un filtro de Instagra
 pegado encima: es el mismo tipo de matemática de scanlines y máscara de fósforo que
 usan los emuladores de RetroArch, corriendo en vivo sobre tu reproductor de Jellyfin.
 
-Poné una serie de los 80, apagá las luces, y volvé a sentir que la estás viendo por
+Pon una serie de los 80, apaga las luces, y vuelve a sentir que la estás viendo por
 primera vez.
 
 ![Captura: barras SMPTE dentro del marco de TV con el shader CRT Lottes aplicado](docs/images/screenshot.png)
