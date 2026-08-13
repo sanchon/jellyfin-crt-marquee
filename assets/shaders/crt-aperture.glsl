@@ -197,7 +197,8 @@ void fragment_main() {
 
 vec4 hook() {
     if (HOOKED_pos.x < SCREEN_MIN.x || HOOKED_pos.x > SCREEN_MAX.x || HOOKED_pos.y < SCREEN_MIN.y || HOOKED_pos.y > SCREEN_MAX.y) {
-        return delinearize(HOOKED_tex(HOOKED_pos));
+        // HOOKED aqui es el MAIN original (crudo, sin linearizar) -- no aplicar delinearize().
+        return HOOKED_tex(HOOKED_pos);
     }
     vertex_main();
     fragment_main();
