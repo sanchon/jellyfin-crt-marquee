@@ -77,15 +77,43 @@ for the full story (including a real false positive that happened early on).
 This repository was generated in a conversational programming session with
 **Claude** (Anthropic), using **Claude Code** (the official CLI agent) as the tool.
 
-- **Model**: Claude Opus 4.8 (model id `claude-opus-4-8[1m]`).
+- **AI assistant**: Claude, by Anthropic — model **Claude Opus 4.8** (model id
+  `claude-opus-4-8[1m]`).
+- **Tool**: [Claude Code](https://claude.com/claude-code), Anthropic's official
+  command-line agent, running in agentic mode with access to PowerShell, file
+  editing and web search (not a plain chat: the agent itself installed
+  software, edited GLSL shaders, read compiler logs, and created/pushed this
+  git repository).
 - **Date**: August 13, 2026.
-- **Commits in the repo**: 11, all in that same session (first commit at 13:10,
-  last at 13:38 by git timestamps — the actual work involved considerably more
-  back-and-forth diagnosis in between that didn't always end up as a commit).
-- **Token cost / session price**: not something accessible from inside the
-  conversation, so it hasn't been made up. If you're interested in that figure,
-  it can be checked from the usage/billing dashboard of the Claude account that
-  ran the session (it isn't exposed to the model itself).
+- **Session duration**: there's no exact start/end stopwatch available to the
+  assistant, but based on real timestamps that were recorded (Jellyfin Media
+  Player logs from 12:15, and 14 git commits between 13:10 and 13:46), the
+  session lasted **at least an hour and a half**; the actual work may have run
+  longer, since the conversation continued after the last commit recorded here.
+- **Number of messages/prompts**: a manual count of the visible turns in the
+  conversation comes to **~30 user messages** (including answers to the
+  assistant's clarifying questions and one uploaded image), across **14
+  commits** to this repository. This is an approximate count done by hand while
+  reviewing the conversation, not an exact metric instrumented by the platform.
+- **Commits in the repo**: 14, all in that same session (first commit at
+  13:10:20, last at 13:46:09 by git timestamps — the actual work involved
+  considerably more back-and-forth diagnosis in between that didn't always end
+  up as a commit).
+- **Token cost (estimate)**: the assistant doesn't have access to an exact token
+  counter from inside the conversation itself, but a rough figure can be
+  reasoned from the session's volume: ~30 turns, long PowerShell outputs
+  (hundred-plus-line shader compile logs), several full re-reads/rewrites of the
+  GLSL shaders (~200-300 lines each), more than a dozen images analyzed
+  (screenshots, test frames, the TV frame image) and several web
+  searches/fetches — and since the full conversation history gets resent on
+  every turn, the cumulative total of tokens processed across the whole session
+  is probably in the **order of several hundred thousand, possibly over a
+  million tokens**. This is a reasoned estimate based on content volume, not a
+  measured figure.
+  For the exact number: in Claude Code you can run the **`/cost`** command
+  during or at the end of the session, which shows real accumulated token usage
+  and cost. If you share that figure, it can replace this estimate with the
+  exact number.
 
 Honest notes on the process, not marketing:
 
