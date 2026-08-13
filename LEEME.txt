@@ -1,0 +1,29 @@
+Instalador de shader CRT + marquee de TV para Jellyfin Media Player.
+
+Contenido:
+  assets\shaders\crt-lottes.glsl      Shader CRT con curvatura, scanlines y mascara RGB.
+  assets\shaders\crt-aperture.glsl    Shader CRT tipo rejilla de apertura, mas nitido y ligero.
+  assets\shaders\crt-hyllian.glsl     Shader CRT con scanlines y mascara balanceada.
+  assets\images\tv_bezel.png          Marco/marquee de TV CRT (con hueco de pantalla en X=36 Y=78 W=474 H=364).
+  install.ps1                         Instalador + selector de shader.
+  Instalar shader CRT.bat             Lanzador de doble clic para install.ps1.
+
+Como usarlo:
+  1. Cierra Jellyfin Media Player si esta abierto.
+  2. Doble clic en "Instalar shader CRT.bat" (tambien hay una copia en el Escritorio).
+  3. El script instala los shaders y la imagen del marco en la carpeta de configuracion
+     de JMP, activa "useOpenGL" (necesario o el shader se ve en pantalla negra), y te
+     deja elegir cual shader usar (o ninguno).
+  4. Abre Jellyfin Media Player normalmente.
+
+Para cambiar de shader mas adelante, repite los pasos 1-4 (correr el instalador de nuevo
+es seguro, no duplica nada, solo reescribe la configuracion).
+
+Notas tecnicas:
+  - El marco de TV siempre queda visible; el shader elegido solo afecta el area de
+    pantalla (X=36 Y=78 W=474 H=364 dentro de la imagen de 670x473).
+  - Jellyfin Media Player NO permite cambiar el shader en caliente con teclado: su propia
+    interfaz intercepta todas las teclas antes de que lleguen a mpv. Por eso el cambio
+    de shader se hace con este instalador y no con un atajo dentro de la app.
+  - Esta carpeta es portable: puedes copiarla a otro PC con Jellyfin Media Player
+    instalado y correr el instalador ahi (no depende de tu usuario de Windows).

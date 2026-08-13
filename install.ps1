@@ -1,0 +1,99 @@
+# Instalador + selector de shader CRT / marquee de TV para Jellyfin Media Player.
+# Se puede correr las veces que quieras: reinstala los assets y te deja re-elegir shader.
+
+$ErrorActionPreference = 'Stop'
+
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$assets    = Join-Path $scriptDir "assets"
+$jmpConfig = Join-Path $env:LOCALAPPDATA "jellyfinmediaplayer"
+
+Write-Host "=== Instalador de shader CRT para Jellyfin Media Player ===" -ForegroundColor Cyan
+Write-Host ""
+
+# 1) Avisar si JMP esta abierto
+$running = Get-Process -Name "JellyfinMediaPlayer" -ErrorAction SilentlyContinue
+if ($running) {
+    Write-Host "Jellyfin Media Player esta abierto. Cierralo para que los cambios se apliquen bien." -ForegroundColor Yellow
+    Read-Host "Cierralo y presiona Enter para continuar (o Enter para seguir de todos modos)"
+}
+
+# 2) Crear carpetas de destino y copiar assets
+New-Item -ItemType Directory -Force -Path $jmpConfig, "$jmpConfig\shaders", "$jmpConfig\images" | Out-Null
+Copy-Item "$assets\shaders\*.glsl" "$jmpConfig\shaders\" -Force
+Copy-Item "$assets\images\tv_bezel.png" "$jmpConfig\images\tv_bezel.png" -Force
+Write-Host "Shaders e imagen del marco instalados en: $jmpConfig" -ForegroundColor Green
+
+# 3) Activar useOpenGL en jellyfinmediaplayer.conf (necesario o el shader se ve en pantalla negra)
+$jsonPath = Join-Path $jmpConfig "jellyfinmediaplayer.conf"
+if (Test-Path $jsonPath) {
+    $json = Get-Content $jsonPath -Raw | ConvertFrom-Json
+    if (-not $json.sections.main) {
+        Write-Host "AVISO: jellyfinmediaplayer.conf no tiene seccion 'main', no se pudo activar useOpenGL." -ForegroundColor Yellow
+    } else {
+        if ($null -eq $json.sections.main.useOpenGL) {
+            $json.sections.main | Add-Member -NotePropertyName useOpenGL -NotePropertyValue $true -Force
+        } else {
+            $json.sections.main.useOpenGL = $true
+        }
+        ($json | ConvertTo-Json -Depth 10) | Set-Content -Path $jsonPath -Encoding utf8
+        Write-Host "useOpenGL activado en jellyfinmediaplayer.conf." -ForegroundColor Green
+    }
+} else {
+    Write-Host "AVISO: no existe jellyfinmediaplayer.conf todavia." -ForegroundColor Yellow
+    Write-Host "Abre Jellyfin Media Player una vez, conectalo a tu servidor, cierralo, y vuelve a correr este instalador." -ForegroundColor Yellow
+}
+
+# 4) Elegir shader
+$options = [ordered]@{
+    "1" = @{ Name = "CRT Lottes (curvatura + scanlines + mascara RGB)"; File = "crt-lottes.glsl" }
+    "2" = @{ Name = "CRT Aperture (rejilla nitida, mas ligero)";        File = "crt-aperture.glsl" }
+    "3" = @{ Name = "CRT Hyllian (scanlines + mascara balanceada)";     File = "crt-hyllian.glsl" }
+    "4" = @{ Name = "Ninguno (video plano dentro del marco de TV)";     File = $null }
+}
+Write-Host ""
+Write-Host "=== Elige el shader CRT ==="
+foreach ($k in $options.Keys) {
+    Write-Host "  $k) $($options[$k].Name)"
+}
+Write-Host ""
+$choice = Read-Host "Opcion (1-4)"
+if (-not $options.Contains($choice)) {
+    Write-Host "Opcion invalida, uso CRT Lottes por defecto." -ForegroundColor Yellow
+    $choice = "1"
+}
+$selected = $options[$choice]
+
+# 5) Generar mpv.conf completo (marquee de TV + shader elegido)
+$tvBezelPath = Join-Path $jmpConfig "images\tv_bezel.png"
+$glslLine = if ($selected.File) { "glsl-shaders=`"~~/shaders/$($selected.File)`"" } else { "# glsl-shaders desactivado (sin efecto CRT)" }
+
+$mpvConfContent = @"
+# Generado por el instalador de shader CRT (JellyfinCRT-Installer).
+# Marquee de TV CRT: inserta el video dentro del hueco de pantalla de tv_bezel.png (670x473),
+# rellenando el area y dejando barras negras si el aspecto no coincide.
+# Se usa --external-file en vez de movie=... dentro del grafo porque el filtro movie
+# no soporta bien rutas de Windows con letra de unidad (bug conocido de ffmpeg/mpv).
+external-file="$tvBezelPath"
+# Fondo negro solido debajo del PNG de la TV: funde a negro tanto el area transparente
+# alrededor de la TV como el borde difuso semi-transparente del hueco de pantalla.
+lavfi-complex=[vid1]scale=474:364:force_original_aspect_ratio=decrease,pad=474:364:(ow-iw)/2:(oh-ih)/2:color=black[v];color=c=black:s=670x473[bg];[bg][vid2]overlay=0:0[tvopaque];[tvopaque][v]overlay=36:78,format=yuv420p[vo]
+
+# Shader CRT activo (confinado al hueco de pantalla del marco)
+$glslLine
+"@
+
+Set-Content -Path (Join-Path $jmpConfig "mpv.conf") -Value $mpvConfContent -Encoding utf8
+
+# input.conf: dejamos la nota de que los atajos no funcionan en JMP
+$inputConfContent = @"
+# Los atajos de teclado personalizados aqui NO funcionan en Jellyfin Media Player:
+# la interfaz de JMP (inputmaps/*.json) intercepta todas las teclas antes de que
+# lleguen a mpv. Para cambiar el shader CRT vuelve a correr install.ps1
+# (o "Instalar shader CRT.bat") antes de abrir JMP.
+"@
+Set-Content -Path (Join-Path $jmpConfig "input.conf") -Value $inputConfContent -Encoding utf8
+
+Write-Host ""
+Write-Host "Listo: $($selected.Name)" -ForegroundColor Green
+Write-Host "Abre (o vuelve a abrir) Jellyfin Media Player para verlo aplicado." -ForegroundColor Green
+Read-Host "Presiona Enter para salir"
