@@ -4,7 +4,7 @@
 
 ### Vuelve a ver tus series como se veían de verdad.
 
-¿Te acuerdas de plantarte frente al televisor de tubo un sábado por la mañana? Las
+¿Te acuerdas de cuando te plantabas frente al televisor un sábado por la mañana? Las
 líneas de escaneo, el brillo fosforescente de la máscara RGB, esa leve curvatura de
 pantalla que hacía que todo se viera un poquito redondeado en los bordes. Así se veían
 *realmente* las series clásicas — no en el 4K plano y perfecto de un monitor moderno,
